@@ -1,5 +1,5 @@
 from scipy.spatial import distance as dist
-from src.Notifier.Notifier import notify
+from pyCiscoSparkMaster.Notifier import notify
 import _pickle as cPickle
 # calculating eye aspect ratio
 import numpy as np
@@ -116,7 +116,25 @@ def notifyDrowsyWeb(drowsyRuleParamsDict,drowsyCNNParamsDict):
 
     notify(notifytext)
 #
-
+# def notifyDrowsy(DrowsyRule, DrowsyCNN,PartialDrowsyRule,PartialDrowsyCNN,postureParamsDict):
+#     ##Check Fatigue
+#     NotDrowsyText ="You are not drowsy"
+#     drowsyText = "\nHi, I can see drowsiness in you \nPlease follow below : \n1)Drink water regularly\n2)Take break and walk around at regular intervals\n" \
+#                  "3)Coffe intake can help if too sleepy\n"
+#     partialDrowsyText = "\nHi, Some signs of drowsiness is observed,\n1)Drink water regularly\n2)Do some desk exercises"
+#     notifytext = ""
+#     COUNTER = postureParamsDict["COUNTER"]
+#     yawn = postureParamsDict["yawn"]
+#     print("COUNTER is" + str(COUNTER))
+#     print("Yawns is" + str(yawn))
+#
+#     if DrowsyRule or DrowsyCNN:
+#         notifytext = drowsyText
+#     elif PartialDrowsyRule or PartialDrowsyCNN :
+#         notifytext = partialDrowsyText
+#     else :
+#         notifytext = NotDrowsyText
+#     notify(notifytext)
 
 def detect(ear,mouEAR,drowsyParamsDict,text):
     COUNTER = drowsyParamsDict["COUNTER"]
@@ -125,22 +143,26 @@ def detect(ear,mouEAR,drowsyParamsDict,text):
     # Threshold values
     EYE_AR_THRESH = 0.23
     EYE_AR_CONSEC_FRAMES = 48
-    MOU_AR_THRESH = 0.70
+    MOU_AR_THRESH = 0.60
+    frameDrow =False
 
     # check to see if the eye aspect ratio is below the blink
     # threshold, and if so, increment the blink frame counter
     if ear < EYE_AR_THRESH:
-        text = "Algo2 : Drowsy"
+        text = "Drowsy"
+        frameDrow = True
         COUNTER += 1
     # otherwise, the eye aspect ratio is not below the blink
     # threshold, so reset the counter and alarm
     else:
         COUNTER = 0
 
+    print("mouEAR %s" % mouEAR)
     # yawning detections
     if mouEAR > MOU_AR_THRESH:
-        text = "Algo2  :Yawning"
+        text = "Yawning"
         yawnStatus = True
+        frameDrow =True
         output_text = "Yawn Count: " + str(yawn + 1)
     else:
         yawnStatus = False
@@ -153,5 +175,6 @@ def detect(ear,mouEAR,drowsyParamsDict,text):
     drowsyParamsDict["COUNTER"] = COUNTER
     drowsyParamsDict["yawn"] = yawn
     drowsyParamsDict["prev_yawn_status"] = prev_yawn_status
+    drowsyParamsDict["yawnStatus"] = yawnStatus
 
-    return text,drowsyParamsDict
+    return text,drowsyParamsDict,frameDrow
