@@ -264,7 +264,7 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
         # Initialise drowsiness details for webex
         notifyDrowsyWeb(drowsyRuleParamsDict,drowsyCNNParamsDict )
         notifyGaze(totalFrames,unAttentiveFrame)
-
+        time.sleep(1000)
     return {"correctPos" : correctPos,"textPosReason": textPosReason,"drowText":drowText ,"drowTextReason" : drowTextReason ,"yawnCount" : drowsyRuleParamsDict["yawn"],
             "AttentiveGaze" : AttentiveGaze,"textGazeReason" : textGazeReason , "wrongPosFrame" :postureParamsDict["wrongPosFrame"] , "totalFrames" : totalFrames }
 
