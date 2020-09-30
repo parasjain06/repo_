@@ -19,6 +19,22 @@ public video:any;
 public responseData:any;
 public videoPlaying:boolean=false;
 public image:any;
+
+
+
+//to display Recommendations counters are used
+public posCount = 0
+public drowCount = 0
+
+//duration of badPosture and drowsiness
+public badPosDrtn = 0
+public drowsinessDrtn = 0 
+public totalDuration = 0
+public drowsinessCount = 0
+public wrongPosFrameCount = 0
+public totalFrameCount = 0
+
+
 ngOnInit(): void {
 console.log(this.videoLoaded)
 this.id = setInterval(this.clickPicture, 5000);
@@ -75,13 +91,56 @@ eAnalyse.click();
 
 
 public all(){
-  console.log("value of image is :" +this.image)
-  console.log("value of Json stringify image is :" +JSON.stringify(this.image))
+
+  console.log("image value is" + (this.image))
+  console.log("all");
+  
+  if (this.drowCount ==7)
+    {
+      this.drowCount=0
+    }
+    if (this.posCount ==7)
+    {
+      this.posCount = 0
+    }
+
+console.log("value of image is :" +this.image)
+console.log("value of Json stringify image is :" +JSON.stringify(this.image))
 console.log("all");
 this.WellnessService.analysis(this.image).subscribe(data => {
 this.responseData = data
 console.log("response data is " + JSON.stringify(this.responseData))
+console.log("totalframes is : " + this.responseData.totalFrames)
+
+  if(this.responseData.drowText == "YES")
+  {
+    this.drowCount= this.drowCount+1
+    this.drowsinessCount= this.drowsinessCount+1
+  }
+  if (this.responseData.correctPos == "NO")
+  {
+    this.posCount =this.posCount +1
+  }
+  this.wrongPosFrameCount = this.responseData.wrongPosFrame
+  this.totalFrameCount = this.responseData.totalFrames
+
 })
+//wrongPosFrameCount
+//calculate the time 
+this.badPosDrtn = Number(((this.wrongPosFrameCount * 4)/60 ).toFixed(2))
+this.drowsinessDrtn = Number(((this.drowsinessCount * 4)/60).toFixed(2))
+this.totalDuration=Number(((this.totalFrameCount * 4)/60).toFixed(2))
+}
+
+
+public Notify()
+{
+  console.log("inside notify")
+  clearInterval(this.id)
+  this.WellnessService.notify(this.image).subscribe(data => {
+    console.log("After notify " + JSON.stringify(data))
+  })
+  
 }
 
 

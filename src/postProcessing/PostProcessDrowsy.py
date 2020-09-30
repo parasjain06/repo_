@@ -96,28 +96,27 @@ def processDrowy(leftEye,rightEye,mouth,drowsyPredictDict,drowsyParamsDict):
     drowsyParamsDict["prev_yawn_status"] = prev_yawn_status
     return drowsyParamsDict
 
-
-
-def notifyDrowsy(DrowsyRule, DrowsyCNN,PartialDrowsyRule,PartialDrowsyCNN,postureParamsDict):
-    ##Check Fatigue
-    NotDrowsyText ="You are not drowsy"
+def notifyDrowsyWeb(drowsyRuleParamsDict,drowsyCNNParamsDict):
+    NotDrowsyText = "No drowsiness observed"
     drowsyText = "\nHi, I can see drowsiness in you \nPlease follow below : \n1)Drink water regularly\n2)Take break and walk around at regular intervals\n" \
                  "3)Coffe intake can help if too sleepy\n"
     partialDrowsyText = "\nHi, Some signs of drowsiness is observed,\n1)Drink water regularly\n2)Do some desk exercises"
-    notifytext = ""
-    COUNTER = postureParamsDict["COUNTER"]
-    yawn = postureParamsDict["yawn"]
-    print("COUNTER is" + str(COUNTER))
-    print("Yawns is" + str(yawn))
+    partialSleepCounter = drowsyCNNParamsDict["partialSleepCounter"]
+    Counter = drowsyRuleParamsDict["COUNTER"]
+    yawn = drowsyRuleParamsDict["yawn"]
 
-    if DrowsyRule or DrowsyCNN:
+    if Counter > 4:
         notifytext = drowsyText
-    elif PartialDrowsyRule or PartialDrowsyCNN :
+    elif yawn > 2:
+        notifytext =drowsyText
+    elif partialSleepCounter > 4:
         notifytext = partialDrowsyText
     else :
         notifytext = NotDrowsyText
 
     notify(notifytext)
+#
+
 
 def detect(ear,mouEAR,drowsyParamsDict,text):
     COUNTER = drowsyParamsDict["COUNTER"]

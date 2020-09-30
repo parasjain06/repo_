@@ -25,6 +25,15 @@ export class WellnessService {
       )
   }
   
+  notify(image:String): Observable<any> {
+    let API_URL = `${this.apiUrl}/wellness?notify=true`;
+    return this.http.post<any>(API_URL, JSON.stringify(image), { headers: this.headers})
+      .pipe(
+            catchError(this.error)
+      )
+  }
+
+  
   error(error: HttpErrorResponse) {
     let errorMessage = '';
     if (error.error instanceof ErrorEvent) {

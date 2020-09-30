@@ -11,7 +11,7 @@
   <div style="width:500px;height:400px"class="video col-sm-12" *ngIf="!videoLoaded" >
   NO VIDEO UPLOADED
   </div>
-  <video #videoElement height="400" width="500"class="video col-sm-12" autoplay controls crossorigin="anonymous" *ngIf="videoLoaded">
+  <video #videoElement height="400" width="500"class="video col-sm-12" autoplay controls loop crossorigin="anonymous" *ngIf="videoLoaded">
   <source [src]="videoUrl" autoplay type="video/mp4">
   </video>
   </div>
@@ -24,8 +24,55 @@
   </div>
   <button class="btn btn-primary" id="clickPicture" (click)="triggerSnapshot();">Snap Photo</button>
   <button class="hide" id="ALL" (click)="all();" style="display:none " >ALL</button>
+  <button class="btn btn-primary" id="notify" (click)="Notify();">Notify</button>
   <div *ngIf="responseData!=null" style=" width:50%; height:100%;float: right">
+
+
   <button class="btn btn-primary" style="width:25%" >DROWSINESS</button>
+	<table *ngIf="responseData!=null" class="table">
+    <tr class="table-striped" ><td class="width50">DROWSINESS</td><td>{{responseData.drowText}}</td></tr>
+    <tr><td class="width50">YAWN COUNT</td><td class="width50">{{responseData.yawnCount}}</td></tr> 
+    <tr class="table-striped" ><td class="width50">REASON</td><td class="width50">{{responseData.drowTextReason}}</td> </tr>
+    <tr><td class="width50">DROWSINESS DURATION</td><td class="width50">{{drowsinessDrtn}}  mins</td></tr>
+    <tr class="table-striped"><td class="width50">TOTAL DURATION</td><td class="width50">{{totalDuration}} mins</td></tr>
+    <tr></tr>
+    </table>
+
+    <button class="btn btn-primary" style="width:25%" >ATTENTIVE</button>
+    
+    <table *ngIf="responseData!=null" class="table">
+    <tr class="table-striped"><td class="width50">ATTENTIVE</td><td>{{responseData.AttentiveGaze}}</td></tr>
+    <tr><td class="width50">REASON</td><td>{{responseData.textGazeReason}}</td></tr>
+    </table>
+    
+    <button class="btn btn-primary" style="width:25%" >POSTURE</button>
+    
+    <table *ngIf="responseData!=null" class="table">
+    <tr class="table-striped"><td class="width50">CORRECT POSTURE</td><td class="width50">{{responseData.correctPos}}</td></tr>
+    <tr><td class="width50">REASON</td><td class="width50">{{responseData.textPosReason}}</td></tr>
+    <tr class="table-striped"><td class="width50">BODY-PART</td><td class="width50">Neck</td></tr>
+    
+    <tr><td class="width50">WRONG POS DURATION</td><td class="width50">{{badPosDrtn}} mins</td></tr> 
+    <tr class="table-striped" ><td class="width50">TOTAL DURATION</td><td class="width50">{{totalDuration}} mins</td></tr> 
+    </table>
+    
+    <!--Recommendations-->
+    <button class="btn btn-primary" style="width:75%; " >RECOMENDATIONS</button>
+    
+    <table *ngIf="responseData!=null" class="table">
+    <tr *ngIf ="drowCount >= 5" class="table-striped">
+        <td >Please drink water , you seems to be drowsy</td>
+    </tr>
+    <tr *ngIf ="posCount >= 5" >
+        <td >Please do some desk exercises</td>
+    </tr>
+    </table>
+
+  </div>
+  </div>
+
+
+    <!-- <button class="btn btn-primary" style="width:25%" >DROWSINESS</button>
   <table *class="table">
   <tr class="table-striped" ><td class="width50">DROWSINESS</td><td class="width50">REASON</td></tr>
   <tr><td>{{responseData.drowTextRuleReason}}</td><td>{{responseData.drowRule}}</td></tr>
@@ -37,10 +84,8 @@
   </table>
   <button class="btn btn-primary" style="width:25%" >POSTURE</button>
   <table class="table">
-  <tr class="table-striped"><td class="width50">WRONG POSTURE</td><td class="width50">{{responseData.correctPos}}</td></tr>
+  <tr class="table-striped"><td class="width50">CORRECT POSTURE</td><td class="width50">{{responseData.correctPos}}</td></tr>
   <tr><td class="width50">REASON</td><td class="width50">{{responseData.textPosReason}}</td></tr>
   <tr class="table-striped"><td class="width50">BODY-PART</td><td class="width50">--</td></tr>
   <tr><td class="width50">YAWN COUNT</td><td class="width50">--</td></tr> 
-  </table>
-  </div>
-  </div>
+  </table> -->

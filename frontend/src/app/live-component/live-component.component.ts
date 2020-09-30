@@ -13,6 +13,19 @@ public webcamImage: WebcamImage = null;
 public showWebcam = true;
 public errors: WebcamInitError[] = [];
 public name : string;
+
+//to display Recommendations counters are used
+public posCount = 0
+public drowCount = 0
+
+//duration of badPosture and drowsiness
+public badPosDrtn = 0
+public drowsinessDrtn = 0 
+public totalDuration = 0
+public drowsinessCount = 0
+public wrongPosFrameCount = 0
+public totalFrameCount = 0
+
 // webcam snapshot trigger
 private trigger: Subject<void> = new Subject<void>();
 id:any; //to clearup set interval looping
@@ -38,11 +51,49 @@ eAnalyse.click();
 public all(){
 console.log("image value is" + (this.webcamImage.imageAsDataUrl))
 console.log("all");
+
+if (this.drowCount ==7)
+  {
+    this.drowCount=0
+  }
+  if (this.posCount ==7)
+  {
+    this.posCount = 0
+  }
+
 this.WellnessService.analysis(this.webcamImage.imageAsDataUrl).subscribe(data => {
   this.data = data
   console.log("data is : " + JSON.stringify(data))
+  if(data.drowText == "YES")
+  {
+    this.drowCount= this.drowCount+1
+    this.drowsinessCount= this.drowsinessCount+1
+  }
+  if (data.correctPos == "NO")
+  {
+    this.posCount =this.posCount +1
+  }
+  this.wrongPosFrameCount = data.wrongPosFrame
+  this.totalFrameCount = data.totalFrames
+  
 })
 
+//wrongPosFrameCount
+//calculate the time 
+this.badPosDrtn = Number(((this.wrongPosFrameCount * 4)/60 ).toFixed(2))
+this.drowsinessDrtn = Number(((this.drowsinessCount * 4)/60).toFixed(2))
+this.totalDuration=Number(((this.totalFrameCount * 4)/60).toFixed(2))
+}
+
+
+public Notify()
+{
+  console.log("inside notify")
+  clearInterval(this.id)
+  this.WellnessService.notify(this.webcamImage.imageAsDataUrl).subscribe(data => {
+
+  })
+  
 }
 
 public handleInitError(error: WebcamInitError): void {

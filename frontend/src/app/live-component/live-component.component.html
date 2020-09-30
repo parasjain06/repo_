@@ -17,6 +17,8 @@
     </div>
     <button class="btn btn-primary" id="clickPicture" (click)="triggerSnapshot();">Snap Photo</button>
     <button class="hide" id="ALL" (click)="all(); " style="display: none;" >ALL</button>
+
+    <button class="btn btn-primary" id="notify" (click)="Notify();">Notify</button>
     <div style=" width:50%; height:100%;float: right">
     <div *ngIf="data==null">
         Loading Data......
@@ -24,25 +26,44 @@
     <div *ngIf="data!=null">
     <button class="btn btn-primary" style="width:25%" >DROWSINESS</button>
     <table *ngIf="data!=null" class="table">
-    <tr class="table-striped" ><td class="width50">DROWSINESS</td><td class="width50">REASON</td></tr>
-    <tr><td>{{data.drowText}}</td><td>{{data.drowTextReason}}</td></tr>
+    <tr class="table-striped" ><td class="width50">DROWSINESS</td><td>{{data.drowText}}</td></tr>
+    <tr><td class="width50">YAWN COUNT</td><td class="width50">{{data.yawnCount}}</td></tr> 
+    <tr class="table-striped" ><td class="width50">REASON</td><td class="width50">{{data.drowTextReason}}</td> </tr>
+    <tr><td class="width50">DROWSINESS DURATION</td><td class="width50">{{drowsinessDrtn}}  mins</td></tr>
+    <tr class="table-striped"><td class="width50">TOTAL DURATION</td><td class="width50">{{totalDuration}} mins</td></tr>
+    <tr></tr>
     </table>
 
     <button class="btn btn-primary" style="width:25%" >ATTENTIVE</button>
     
     <table *ngIf="data!=null" class="table">
-    <tr class="table-striped"><td class="width50">ATTENTIVE</td><td class="width50">REASON</td></tr>
-    <tr><td>{{data.AttentiveGaze}}</td><td>{{data.textGazeReason}}</td></tr>
+    <tr class="table-striped"><td class="width50">ATTENTIVE</td><td>{{data.AttentiveGaze}}</td></tr>
+    <tr><td class="width50">REASON</td><td>{{data.textGazeReason}}</td></tr>
     </table>
     
     <button class="btn btn-primary" style="width:25%" >POSTURE</button>
     
     <table *ngIf="data!=null" class="table">
-    <tr class="table-striped"><td class="width50">WRONG POSTURE</td><td class="width50">{{data.correctPos}}</td></tr>
+    <tr class="table-striped"><td class="width50">CORRECT POSTURE</td><td class="width50">{{data.correctPos}}</td></tr>
     <tr><td class="width50">REASON</td><td class="width50">{{data.textPosReason}}</td></tr>
     <tr class="table-striped"><td class="width50">BODY-PART</td><td class="width50">Neck</td></tr>
-    <tr><td class="width50">YAWN COUNT</td><td class="width50">{{data.yawnCount}}</td></tr> 
+    
+    <tr><td class="width50">WRONG POS DURATION</td><td class="width50">{{badPosDrtn}} mins</td></tr> 
+    <tr class="table-striped" ><td class="width50">TOTAL DURATION</td><td class="width50">{{totalDuration}} mins</td></tr> 
     </table>
+    
+    <!--Recommendations-->
+    <button class="btn btn-primary" style="width:75%; " >RECOMENDATIONS</button>
+    
+    <table *ngIf="data!=null" class="table">
+    <tr *ngIf ="drowCount >= 5" class="table-striped">
+        <td >Please drink water , you seems to be drowsy</td>
+    </tr>
+    <tr *ngIf ="posCount >= 5" >
+        <td >Please do some desk exercises</td>
+    </tr>
+    </table>
+
     </div>
     </div>
     </div>

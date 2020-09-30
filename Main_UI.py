@@ -13,7 +13,7 @@ import requests
 from PIL import Image
 import uuid
 from PostProcessorPosture import notifyPosture
-from PostProcessDrowsy import notifyDrowsy
+from PostProcessDrowsy import notifyDrowsyWeb
 from PostProcessGaze import notifyGaze
 import time
 from fastapi.responses import JSONResponse
@@ -62,22 +62,15 @@ PartialDrowsyRule = False
 DrowsyCNN = False
 PartialDrowsyCNN =False
 
-totalFrames =0
-
 
 ##Calculate the start time
 start = time.time()
 elapsed = 0
-
-app = FastAPI()
 # Gaze FastAPI
+app = FastAPI()
 
-# async def drowsyParamsDict():
-#     return { "COUNTER":0,"yawnStatus":"False", "yawn":0, "prev_yawn_status":"False"}
-#
-# async def postureParamsDict():
-#     return { "wrongPosFrame":0,"shoulderNotVisible":0, "neckStrainCounter":0, "handSupportCounter":0}
 
+#Adding CORS policy
 origins = [
     "http://localhost",
     "http://localhost:8080",
@@ -120,16 +113,15 @@ app.state.drowsyParamsDict = ""
 
 app.state.counter_1 = 0
 
-def well():
-    print("hi there")
-
 
 @app.post("/wellness", response_class=JSONResponse)
 async def wellness(request : Request,body: str = Body(...), notify: bool = None):
     print("Notify value is " +str(notify))
+    request.app.state.totalFrames = app.state.totalFrames + 1
+    #request.app.state.counter_1 = app.state.counter_1 +  1
+    totalFrames = request.app.state.totalFrames
+    #print (request.app.state.counter_1)
 
-    request.app.state.counter_1 = app.state.counter_1 +  1
-    print (request.app.state.counter_1)
     app.state.Counter = request.app.state.Counter
     image = Image.open(BytesIO(base64.b64decode(body[23:])))
     postureParamsDict = {"wrongPosFrame":request.app.state.wrongPosFrame,"shoulderNotVisible":request.app.state.shoulderNotVisible,
@@ -142,10 +134,9 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
     # Elapsed time since start
     current_time = time.time()
     elapsed = current_time - start
-    ##frame1 = imutils.resize(frame, width=640)
+
     fid = uuid.uuid4()
     i_name = str(fid) + '.jpg'
-    ##img = image.fromarray(frame1, 'RGB')
     image.save(img_path + i_name)
 
     file = [
@@ -160,18 +151,12 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
     fileGaze = [
         ('file1', open(img_path + i_name, 'rb'))
     ]
-    #
-    # #data = {'arr' : frame.tolist()}
-    # #data_gaze = {'arr' : frame.tolist()}
-    # #cv2.rectangle(frame, (1, 1), (900, 100), (0, 0, 0), -1)
-    # #cv2.putText(frame, "........................Detecting Posture, Fatigue and Attention........................", (20, 15), cv2.FONT_HERSHEY_COMPLEX, .5, (0, 235, 0), 1, cv2.LINE_AA)
-    #
+
     with ThreadPoolExecutor(max_workers=3) as executor:
         posture_detect = executor.submit(requestDetect, pos_url , filePos, {})
         gaze_detect = executor.submit(requestDetect, gaze_url, fileGaze, {})
         drowsy_detectRule = executor.submit(requestDetect, drow_url ,file,{})
         drowsy_detectCNN = executor.submit(requestDetect, drowCNN_url, fileDrow, {})
-
     # Posture
     textPosReason ="You are in a Good posture"
     correctPos = "YES"
@@ -181,8 +166,6 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
             postureParamsDict, textPosReason = processPosture(posture_detect_json, postureParamsDict, textPosReason)
             if textPosReason != "You are in a Good posture" and textPosReason != "Are you there? I cant see you!":
                 correctPos="NO"
-
-
     # Rule based drowsy
     drowTextRuleReason = "No Drowsyness observed"
     drowRule="NO"
@@ -194,7 +177,6 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
             ear = drowRule_json['ear']
             mouEAR = drowRule_json['mouEAR']
             drowTextRuleReason, drowsyRuleParamsDict,frameDrowRule = detect(ear, mouEAR, drowsyRuleParamsDict, drowTextRuleReason)
-
 
             if drowsyRuleParamsDict["yawn"] > 0:
                 DrowsyRule = True
@@ -239,13 +221,6 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
     elif frameDrowRule == True or frameDrowCNN == True:
         drowText = "YES"
         drowTextReason = "Drowsiness Observed"
-            #
-            # if drowsyCNNParamsDict["sleepyCounter"] > 4:
-            #     DrowsyCNN = True
-            #     drowTextNotify = "Drowsyness observed"
-            # elif drowsyCNNParamsDict["partialSleepCounter"] > 4:
-            #     PartialDrowsyCNN = True
-            #     drowTextNotify = "Some Signs of Drowsiness"
 
     # Gaze
     # Gaze detection
@@ -261,9 +236,6 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
                 AttentiveGaze = "NO"
             else:
                 AttentiveGaze = "YES"
-
-    # cv2.putText(frame, "Seconds : %s"% elapsed, (120, 100), cv2.FONT_HERSHEY_COMPLEX, .5, (0, 235, 0), 1, cv2.LINE_AA)
-    # cv2.imshow("Frames",frame)
 
     print("Actual duration %s" % (elapsed/60))
     app.state.wrongPosFrame = postureParamsDict["wrongPosFrame"]
@@ -285,40 +257,17 @@ async def wellness(request : Request,body: str = Body(...), notify: bool = None)
     app.state.unAttentiveFrame = unAttentiveFrame
 
     #Notification
-    # textUI=""
-    # if(textUI == "notify"):
-    #     #Initialise posture details for webex
-    #     notifyPosture(postureParamsDict,totalFrames)
-    #
-    #     # Initialise drowsiness details for webex
-    #     notifyDrowsy(DrowsyRule, DrowsyCNN,PartialDrowsyRule,PartialDrowsyCNN,drowsyParamsDict)
-    #     notifyGaze(totalFrames,unAttentiveFrame)
-    #
-    #
-    # return {"postureParamsDict" : postureParamsDict ,"drowsyParamsDict" : drowsyParamsDict ,
-    #         "textPos " : textPos , "drowText " : drowText , "textGaze" : textGaze}
-    #return { "textPos " : textPos , "drowTextRule" : drowTextRule, "drowTextCNN" : drowTextCNN,"textGaze" : textGaze}
+
+    if(notify == True):
+        #Initialise posture details for webex
+        notifyPosture(postureParamsDict,totalFrames)
+        # Initialise drowsiness details for webex
+        notifyDrowsyWeb(drowsyRuleParamsDict,drowsyCNNParamsDict )
+        notifyGaze(totalFrames,unAttentiveFrame)
+
     return {"correctPos" : correctPos,"textPosReason": textPosReason,"drowText":drowText ,"drowTextReason" : drowTextReason ,"yawnCount" : drowsyRuleParamsDict["yawn"],
-            "AttentiveGaze" : AttentiveGaze,"textGazeReason" : textGazeReason}
+            "AttentiveGaze" : AttentiveGaze,"textGazeReason" : textGazeReason , "wrongPosFrame" :postureParamsDict["wrongPosFrame"] , "totalFrames" : totalFrames }
 
-
-
-@app.post("/Notify", response_class=JSONResponse)
-async def Notify(request: Request):
-    postureParamsDict = request.app.state.postureParamsDict
-    drowsyParamsDict = request.app.state.drowsyRuleParamsDict
-    unAttentiveFrame = request.app.state.unAttentiveFrame
-
-    print("postureParamsDict value is : " +postureParamsDict)
-    print("drowsyParamsDict value is " + drowsyParamsDict)
-    print("unAttentiveFrame value is " +unAttentiveFrame)
-
-
-    #Initialise posture details for webex
-    notifyPosture(postureParamsDict,totalFrames)
-    # Initialise drowsiness details for webex
-    notifyDrowsy(DrowsyRule, DrowsyCNN,PartialDrowsyRule,PartialDrowsyCNN,drowsyParamsDict)
-    notifyGaze(totalFrames,unAttentiveFrame)
 
 
 if __name__ == "__main__":
